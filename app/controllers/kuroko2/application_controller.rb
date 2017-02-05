@@ -4,7 +4,7 @@ class Kuroko2::ApplicationController < ActionController::Base
   protect_from_forgery with: :exception
 
   helper_method :current_user, :signed_in?
-  before_action :require_sign_in
+  before_action :authenticate, :require_sign_in
 
   rescue_from HTTP::BadRequest do
     respond_to do |format|
@@ -33,6 +33,13 @@ class Kuroko2::ApplicationController < ActionController::Base
 
   def signed_in?
     current_user.present?
+  end
+
+  def authenticate
+    if authenticate_or_request_with_http_basic('Administration') do |username, password|
+        username == ENV['BASIC_USERNAME'] && password == ENV['BASIC_PASSWORD']
+      end
+    end
   end
 
   def require_sign_in
